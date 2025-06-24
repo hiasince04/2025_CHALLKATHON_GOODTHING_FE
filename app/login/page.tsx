@@ -12,18 +12,31 @@ import { Label } from '@/components/ui/label';
 export default function LoginPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const role = searchParams.get('role') || 'senior'; // 기본값은 senior
+    const role = searchParams.get('role') || 'senior';
+    const from = searchParams.get('from') || '';
+    const redirectFlag = typeof window !== 'undefined' ? localStorage.getItem('loginRedirect') : null;
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        // 실제 로그인 로직 추가 필요
-        console.log('Login attempt for role:', role);
 
-        // 로그인 성공 후 역할에 따라 리디렉션
+        // ✅ 로그인 시 역할 기억
+        localStorage.setItem('role', role);
+
+        // ✅ 마이페이지로 가는 흐름
         if (role === 'senior') {
-            router.push('/senior/select-team');
+            if (redirectFlag === 'mypage' || from === 'mypage') {
+                localStorage.removeItem('loginRedirect');
+                router.push('/senior/my-page');
+            } else {
+                router.push('/senior/select-team');
+            }
         } else {
-            router.push('/helper/my-page'); // ✅ 수정된 부분
+            if (redirectFlag === 'mypage' || from === 'mypage') {
+                localStorage.removeItem('loginRedirect');
+                router.push('/helper/my-page');
+            } else {
+                router.push('/helper/dashboard');
+            }
         }
     };
 
